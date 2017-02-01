@@ -24,7 +24,7 @@ def test_create(api_client, fixt_user):
     }
     response = api_client.post('/api-auth/', credentials)
     print(credentials, response.data)
-    api_client.credentials(HTTP_AUTHORIZATION='Token ' + response.data['key'])
+    api_client.credentials(HTTP_AUTHORIZATION='Token ' + response.data['token'])
 
     response = api_client.post('/reservation/', data)
     assert response.status_code == status.HTTP_201_CREATED

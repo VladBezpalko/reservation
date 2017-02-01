@@ -36,6 +36,7 @@ def fixt_user(db):
         username='john',
     )
     user.set_password('secret')
+    user.save()
     return user
 
 
