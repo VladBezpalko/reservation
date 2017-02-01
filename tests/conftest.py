@@ -46,7 +46,6 @@ def fixt_admin(db):
         email='admin@localhost',
         username='Admin',
         is_staff=True,
-        is_admin=True,
     )
 
 
@@ -63,28 +62,29 @@ def fixt_reservation(db, fixt_user):
 
 @pytest.fixture
 def fixt_reservations(db, fixt_user):
-    return RoomReservation.objects.bulk_create(
-        [
-            RoomReservation(
-                creator=fixt_user,
-                theme='Test reservation 1',
-                description='test test test',
-                start_date=datetime(2017, 1, 13, 10, 30),
-                end_date=datetime(2017, 1, 13, 11),
-            ),
-            RoomReservation(
-                creator=fixt_user,
-                theme='Test reservation 2',
-                description='test test test',
-                start_date=datetime(2017, 1, 13, 10),
-                end_date=datetime(2017, 1, 13, 11),
-            ),
-            RoomReservation(
-                creator=fixt_user,
-                theme='Test reservation 3',
-                description='test test test',
-                start_date=datetime(2017, 1, 13, 12),
-                end_date=datetime(2017, 1, 13, 13),
-            ),
-        ]
-    )
+    return [
+        RoomReservation.objects.create(
+            creator=fixt_user,
+            theme='Test reservation 1',
+            description='test test test',
+            start_date=datetime(2017, 1, 13, 10, 30),
+            end_date=datetime(2017, 1, 13, 11),
+            answer=RoomReservation.ALLOW,
+        ),
+        RoomReservation.objects.create(
+            creator=fixt_user,
+            theme='Test reservation 2',
+            description='test test test',
+            start_date=datetime(2017, 1, 13, 10),
+            end_date=datetime(2017, 1, 13, 11),
+            answer=RoomReservation.ALLOW,
+        ),
+        RoomReservation.objects.create(
+            creator=fixt_user,
+            theme='Test reservation 3',
+            description='test test test',
+            start_date=datetime(2017, 1, 13, 12),
+            end_date=datetime(2017, 1, 13, 13),
+            answer=RoomReservation.ALLOW,
+        ),
+    ]
