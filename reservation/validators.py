@@ -30,3 +30,12 @@ def validate_not_late(value):
               format(min_time)),
             code='invalid'
         )
+
+
+def validate_not_weekend(value):
+    if value.weekday() >= 5:
+        raise ValidationError(
+            _("You can't reserve room at weekends."),
+            code='invalid'
+        )
+
