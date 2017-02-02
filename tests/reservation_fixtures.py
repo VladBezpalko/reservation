@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.conf import settings
 from pytest import fixture
@@ -8,13 +8,13 @@ from django.utils import timezone
 
 
 @fixture
-def fixt_reservation(db, fixt_user):
+def fixt_reservation(db, fixt_user, fixt_normal_date):
     return RoomReservation.objects.create(
         creator=fixt_user,
         theme='Test reservation 1',
         description='test test test',
-        start_date=datetime(2017, 1, 13, 10, 30),
-        end_date=datetime(2017, 1, 13, 11),
+        start_date=fixt_normal_date,
+        end_date=fixt_normal_date + settings.MINIMUM_MEETING_DURATION,
     )
 
 
@@ -85,13 +85,13 @@ def fixt_overlap_reservation(db, fixt_reservation, fixt_user):
 
 
 @fixture
-def fixt_admin_reservation(db, fixt_admin):
+def fixt_admin_reservation(db, fixt_admin, fixt_normal_date):
     return RoomReservation.objects.create(
         creator=fixt_admin,
         theme='Test reservation 2',
         description='test test test',
-        start_date=datetime(2017, 1, 13, 10, 30),
-        end_date=datetime(2017, 1, 13, 11),
+        start_date=fixt_normal_date,
+        end_date=fixt_normal_date + settings.MINIMUM_MEETING_DURATION,
     )
 
 
