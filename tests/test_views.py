@@ -5,21 +5,13 @@ from rest_framework import status
 from pytest import fixture
 
 from reservation.models import RoomReservation
-from reservation.serializers import RoomReservationSerializer
+
 
 User = get_user_model()
 
 
-def dict_equals(x, y):
-    diff = set(dict(x.items())) - set(dict(y.items()))
-    return diff == set()
-
-
 @fixture
 def fixt_data(fixt_normal_date):
-    """
-    Using normal_date here, because hardcoded date PROTOOHAET
-    """
     return {
         'start_date': fixt_normal_date,
         'end_date': fixt_normal_date + settings.MINIMUM_MEETING_DURATION,
@@ -49,16 +41,14 @@ def test_create_anon(api_client, fixt_data):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_create(api_client, fixt_user, fixt_data):
-    api_client.force_authenticate(user=fixt_user)
-    response = api_client.post('/reservation/', fixt_data)
+def test_create(api_user, fixt_data):
+    response = api_user.post('/reservation/', fixt_data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
 
-def test_update(api_client, fixt_user, fixt_part_data, fixt_reservation):
-    api_client.force_authenticate(user=fixt_user)
-    response = api_client.patch(
+def test_update(api_user, fixt_part_data, fixt_reservation):
+    response = api_user.patch(
         '/reservation/{}/'.format(fixt_reservation.id),
         fixt_part_data
     )
@@ -66,10 +56,26 @@ def test_update(api_client, fixt_user, fixt_part_data, fixt_reservation):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_reply_simple_user(api_client, fixt_user, fixt_reservation,
-                           fixt_answer_allow):
-    api_client.force_authenticate(user=fixt_user)
-    response = api_client.post(
+def test_update_not_owner(api_user, fixt_part_data, fixt_admin_reservation):
+    response = api_user.patch(
+        '/reservation/{}/'.format(fixt_admin_reservation.id),
+        fixt_part_data
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_update_admin(api_admin, fixt_part_data, fixt_reservation):
+    response = api_admin.patch(
+        '/reservation/{}/'.format(fixt_reservation.id),
+        fixt_part_data
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_reply_simple_user(api_user, fixt_reservation, fixt_answer_allow):
+    response = api_user.post(
         '/reservation/{}/reply/'.format(fixt_reservation.id),
         fixt_answer_allow
     )
@@ -77,10 +83,8 @@ def test_reply_simple_user(api_client, fixt_user, fixt_reservation,
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_reply_admin(api_client, fixt_admin, fixt_reservation,
-                     fixt_answer_allow):
-    api_client.force_authenticate(user=fixt_admin)
-    response = api_client.post(
+def test_reply_admin(api_admin, fixt_reservation, fixt_answer_allow):
+    response = api_admin.post(
         '/reservation/{}/reply/'.format(fixt_reservation.id),
         fixt_answer_allow
     )
@@ -90,18 +94,9 @@ def test_reply_admin(api_client, fixt_admin, fixt_reservation,
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_reply_overlap(api_client, fixt_admin, fixt_reservation,
+def test_reply_overlap(api_admin, fixt_reservation, fixt_overlap_reservation,
                        fixt_answer_allow):
-    RoomReservation.objects.create(
-        creator=fixt_admin,
-        theme='123',
-        description='456',
-        start_date=fixt_reservation.start_date,
-        end_date=fixt_reservation.end_date,
-        answer=RoomReservation.ALLOW,
-    )
-    api_client.force_authenticate(user=fixt_admin)
-    response = api_client.post(
+    response = api_admin.post(
         '/reservation/{}/reply/'.format(fixt_reservation.id),
         fixt_answer_allow
     )
@@ -111,20 +106,19 @@ def test_reply_overlap(api_client, fixt_admin, fixt_reservation,
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_overlapping(api_client, fixt_admin, fixt_reservation):
-    overlapped = RoomReservation.objects.create(
-        creator=fixt_admin,
-        theme='123',
-        description='456',
-        start_date=fixt_reservation.start_date,
-        end_date=fixt_reservation.end_date,
-        answer=RoomReservation.ALLOW,
-    )
-    api_client.force_authenticate(user=fixt_admin)
-    response = api_client.get(
+def test_overlapping(api_admin, fixt_reservation, fixt_overlap_reservation):
+    response = api_admin.get(
         '/reservation/{}/overlapping/'.format(fixt_reservation.id)
     )
-    serialized = RoomReservationSerializer(overlapped)
 
-    assert dict_equals(serialized.data, response.data[0])
+    assert fixt_overlap_reservation.id == response.data[0]['id']
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_not_overlapping(api_admin, fixt_reservation):
+    response = api_admin.get(
+        '/reservation/{}/overlapping/'.format(fixt_reservation.id)
+    )
+
+    assert not response.data
     assert response.status_code == status.HTTP_200_OK
