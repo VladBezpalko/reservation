@@ -1,124 +1,33 @@
-from datetime import timedelta
 
-from django.utils import timezone
-from django.conf import settings
-
-from reservation.models import RoomReservation
-
-
-def test_room_reservation(fixt_reservation):
-    assert fixt_reservation.answer == RoomReservation.PENDING
-
-
-def test_simple_overlapping(db, fixt_user):
+def test_simple_overlapping(db, fixt_two_overlap_reservations):
     """
     Simple multiple overlapping
     """
-    date = timezone.now()
-    RoomReservation.objects.bulk_create([
-        RoomReservation(
-            creator=fixt_user,
-            start_date=date + timedelta(minutes=5),
-            end_date=date + timedelta(minutes=10),
-            theme='123',
-            description='321',
-            answer=RoomReservation.ALLOW,
-        ),
-        RoomReservation(
-            creator=fixt_user,
-            start_date=date + timedelta(minutes=11),
-            end_date=date + timedelta(minutes=25),
-            theme='321',
-            description='123',
-            answer=RoomReservation.ALLOW,
-        )]
-    )
+    *_, not_allowed = fixt_two_overlap_reservations
 
-    assert RoomReservation(
-        creator=fixt_user,
-        start_date=date,
-        end_date=date + timedelta(minutes=45),
-        theme='666',
-        description='777'
-    ).overlapping_list.count() == 2
+    assert not_allowed.is_overlap
+    assert not_allowed.overlapping_list.count() == 2
 
 
-def test_not_overlaps(db, fixt_user):
-    date = timezone.now()
-    RoomReservation.objects.bulk_create([
-        RoomReservation(
-            creator=fixt_user,
-            start_date=date + timedelta(minutes=5),
-            end_date=date + timedelta(minutes=10),
-            theme='123',
-            description='321',
-            answer=RoomReservation.ALLOW,
-        ),
-        RoomReservation(
-            creator=fixt_user,
-            start_date=date + timedelta(minutes=11),
-            end_date=date + timedelta(minutes=25),
-            theme='321',
-            description='123',
-            answer=RoomReservation.ALLOW,
-        )]
-    )
+def test_not_overlaps(db, fixt_not_overlap_reservation):
 
-    assert not RoomReservation(
-        creator=fixt_user,
-        start_date=date + timedelta(minutes=26),
-        end_date=date + timedelta(minutes=45),
-        theme='666',
-        description='777'
-    ).is_overlap
+    assert not fixt_not_overlap_reservation.is_overlap
+    assert not fixt_not_overlap_reservation.overlapping_list
 
 
-def test_same_date_overlaps(db, fixt_user):
+def test_same_date_overlaps(db, fixt_reservation_same_date):
     """
     Reservations with equal date must overlaps
     """
-    date = timezone.now()
-    RoomReservation.objects.create(
-        creator=fixt_user,
-        start_date=date,
-        end_date=date + settings.MINIMUM_MEETING_DURATION,
-        theme='123',
-        description='321',
-        answer=RoomReservation.ALLOW
-    )
-    reservation = RoomReservation.objects.create(
-        creator=fixt_user,
-        start_date=date,
-        end_date=date + settings.MINIMUM_MEETING_DURATION,
-        theme='321',
-        description='123',
-    )
 
-    assert reservation.is_overlap
-    assert reservation.overlapping_list[0].theme == '123'
+    assert fixt_reservation_same_date.is_overlap
 
 
-def test_back_to_back_not_overlaps(db, fixt_user):
+def test_back_to_back_not_overlaps(db, fixt_back_to_back_reservation):
     """
     One reservation ends in 19:00:00,
     and another starts at 19:00:00,
     they does not overlaps
     """
-    date = timezone.now()
-    RoomReservation.objects.create(
-        creator=fixt_user,
-        start_date=date,
-        end_date=date + settings.MINIMUM_MEETING_DURATION,
-        theme='123',
-        description='321',
-        answer=RoomReservation.ALLOW
-    )
-    reservation = RoomReservation.objects.create(
-        creator=fixt_user,
-        start_date=date + settings.MINIMUM_MEETING_DURATION,
-        end_date=date + settings.MINIMUM_MEETING_DURATION * 2,
-        theme='321',
-        description='123',
-    )
 
-    assert not reservation.is_overlap
+    assert not fixt_back_to_back_reservation.is_overlap

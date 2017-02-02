@@ -16,8 +16,8 @@ def test_not_deletes_new_reservations(fixt_reservation):
     assert RoomReservation.objects.first() == fixt_reservation
 
 
-def test_deletes_old_reservations(fixt_reservations):
-    for reservation in fixt_reservations:
+def test_deletes_old_reservations(fixt_two_overlap_reservations):
+    for reservation in fixt_two_overlap_reservations:
         reservation.end_date = timezone.now() - timedelta(days=31)
         reservation.save()
     delete_old_records()
