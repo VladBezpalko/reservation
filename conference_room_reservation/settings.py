@@ -1,4 +1,5 @@
 import os
+from datetime import time, timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -118,12 +119,6 @@ REST_FRAMEWORK = {
     )
 }
 
-from datetime import time, timedelta
-
-WORK_HOURS = (time(8, 30), time(17, 30))
-
-MIN_TIME_BEFORE_RESERVATION = timedelta(minutes=30)
-
 BROKER_URL = 'redis://'
 CELERY_RESULT_BACKEND = 'redis://'
 
@@ -133,3 +128,9 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(days=30),
     },
 }
+
+# Reservation settings
+WORK_HOURS = (time(8, 30), time(17, 30))
+MIN_TIME_BEFORE_RESERVATION = timedelta(minutes=30)
+MINIMUM_MEETING_DURATION = timedelta(minutes=20)
+MAXIMUM_MEETING_DURATION = timedelta(hours=3)
