@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from rest_framework import serializers
 
 
 def validate_working_hours(value):
@@ -39,3 +40,33 @@ def validate_not_weekend(value):
             code='invalid'
         )
 
+
+def validate_end_after_start(data):
+    if 'start_date' in data and 'end_date' in data:
+
+        if data['start_date'] > data['end_date']:
+            raise serializers.ValidationError(
+                _('Start date should be earlier than end date')
+            )
+
+
+def validate_max_duration(data):
+    if 'start_date' in data and 'end_date' in data:
+        duration = data['end_date'] - data['start_date']
+
+        if duration > settings.MAXIMUM_MEETING_DURATION:
+            raise serializers.ValidationError(
+                _('Duration of reservation cannot be longer '
+                  'than {} hours').format(settings.MAXIMUM_MEETING_DURATION)
+            )
+
+
+def validate_min_duration(data):
+    if 'start_date' in data and 'end_date' in data:
+        duration = data['end_date'] - data['start_date']
+
+        if duration < settings.MINIMUM_MEETING_DURATION:
+            raise serializers.ValidationError(
+                _('Duration of reservation cannot be shorter '
+                  'than {} hours').format(settings.MINIMUM_MEETING_DURATION)
+            )

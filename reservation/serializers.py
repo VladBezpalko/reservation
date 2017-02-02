@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.utils.translation import ugettext_lazy as _
-
+from reservation.validators import (
+    validate_end_after_start,
+    validate_max_duration,
+    validate_min_duration,
+)
 from rest_framework import serializers
 
 from reservation.models import RoomReservation
@@ -18,17 +21,6 @@ class RoomReservationSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
 
-    def validate(self, data):
-        if (
-            'start_date' in data and
-            'end_date' in data and
-            data['start_date'] > data['end_date']
-        ):
-            raise serializers.ValidationError(
-                _('Start date should be earlier then end date')
-            )
-        return data
-
     class Meta:
         model = RoomReservation
         fields = (
@@ -41,6 +33,11 @@ class RoomReservationSerializer(serializers.ModelSerializer):
             'answer',
         )
         read_only_fields = ('answer', )
+        validators = [
+            validate_end_after_start,
+            validate_max_duration,
+            validate_min_duration,
+        ]
 
 
 class AnswerSerializer(serializers.ModelSerializer):
