@@ -6,6 +6,15 @@ from pytest_django.lazy_django import skip_if_no_django
 from reservation.models import RoomReservation
 from django.contrib.auth import get_user_model
 
+from .date_fixtures import (
+    fixt_normal_date,
+    fixt_date_after_work,
+    fixt_date_in_the_past,
+    fixt_date_late_to_reserve,
+    fixt_date_conflict_duration,
+    fixt_date_weekend,
+)
+
 User = get_user_model()
 
 

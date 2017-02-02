@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from rest_framework import status
 from pytest import fixture
@@ -17,19 +16,22 @@ def dict_equals(x, y):
 
 
 @fixture
-def fixt_data():
+def fixt_data(fixt_normal_date):
+    """
+    Using normal_date here, because hardcoded date PROTOOHAET
+    """
     return {
-        'start_date': datetime(2017, 2, 12, 17, 00),
-        'end_date': datetime(2017, 2, 12, 17, 20),
+        'start_date': fixt_normal_date,
+        'end_date': fixt_normal_date + settings.MINIMUM_MEETING_DURATION,
         'theme': 'THEME',
         'description': 'desc',
     }
 
 
 @fixture
-def fixt_part_data():
+def fixt_part_data(fixt_normal_date):
     return {
-        'start_date': datetime(2017, 2, 12, 15, 00),
+        'start_date': fixt_normal_date,
         'theme': 'theme',
     }
 
@@ -43,12 +45,14 @@ def fixt_answer_allow():
 
 def test_create_anon(api_client, fixt_data):
     response = api_client.post('/reservation/', fixt_data)
+
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_create(api_client, fixt_user, fixt_data):
     api_client.force_authenticate(user=fixt_user)
     response = api_client.post('/reservation/', fixt_data)
+
     assert response.status_code == status.HTTP_201_CREATED
 
 
@@ -58,6 +62,7 @@ def test_update(api_client, fixt_user, fixt_part_data, fixt_reservation):
         '/reservation/{}/'.format(fixt_reservation.id),
         fixt_part_data
     )
+
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -68,6 +73,7 @@ def test_reply_simple_user(api_client, fixt_user, fixt_reservation,
         '/reservation/{}/reply/'.format(fixt_reservation.id),
         fixt_answer_allow
     )
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
