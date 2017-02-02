@@ -8,6 +8,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.utils import timezone
+from django.http import HttpRequest
 
 
 @fixture
@@ -102,3 +103,13 @@ def fixt_date_conflict_duration(fixt_normal_date):
     date -= settings.MINIMUM_MEETING_DURATION / 2
 
     return date
+
+
+@fixture
+def fixt_serializer_context(fixt_user):
+    """
+    Serializers is_valid() do not want work without this context
+    """
+    request = HttpRequest()
+    request.user = fixt_user
+    return {'request': request}
