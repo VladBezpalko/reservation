@@ -3,7 +3,7 @@ from django.conf import settings
 
 from rest_framework import status
 from pytest import fixture
-
+from freezegun import freeze_time
 from reservation.models import RoomReservation
 
 
@@ -41,12 +41,14 @@ def test_create_anon(api_client, fixt_data):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+@freeze_time('2016-2-1')
 def test_create(api_user, fixt_data):
     response = api_user.post('/reservation/', fixt_data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
 
+@freeze_time('2016-2-1')
 def test_update(api_user, fixt_part_data, fixt_reservation):
     response = api_user.patch(
         '/reservation/{}/'.format(fixt_reservation.id),
@@ -65,6 +67,7 @@ def test_update_not_owner(api_user, fixt_part_data, fixt_admin_reservation):
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+@freeze_time('2016-2-1')
 def test_update_admin(api_admin, fixt_part_data, fixt_reservation):
     response = api_admin.patch(
         '/reservation/{}/'.format(fixt_reservation.id),

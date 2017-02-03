@@ -1,12 +1,15 @@
+from datetime import datetime
+
 from pytest import fixture
 
 from pytest_django.lazy_django import skip_if_no_django
 
 from django.contrib.auth import get_user_model
+from pytz import UTC
 
 User = get_user_model()
 
-pytest_plugins = ['date_fixtures', 'reservation_fixtures']
+pytest_plugins = ['reservation_fixtures']
 
 
 @fixture
@@ -57,3 +60,11 @@ def api_user(api_client, fixt_user):
 def api_admin(api_client, fixt_admin):
     api_client.force_authenticate(user=fixt_admin)
     return api_client
+
+
+@fixture
+def fixt_normal_date():
+    """
+    Return basic valid date.
+    """
+    return datetime(2016, 2, 1, hour=11, minute=30, tzinfo=UTC)

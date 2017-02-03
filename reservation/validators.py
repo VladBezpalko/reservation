@@ -9,36 +9,25 @@ from rest_framework import serializers
 def validate_working_hours(value):
     start, end = settings.WORK_HOURS
     if not (start < value.time() < end):
-        raise ValidationError(
-            _('Time should be in range of working hours.'),
-            code='invalid'
-        )
+        raise ValidationError(_('Time should be in range of working hours.'))
 
 
 def validate_not_in_past(value):
     if value < timezone.now():
-        raise ValidationError(
-            _('Time should be in future.'),
-            code='invalid'
-        )
+        raise ValidationError(_('Time should be in future.'))
 
 
 def validate_not_late(value):
     min_time = settings.MIN_TIME_BEFORE_RESERVATION
     if value < timezone.now() + min_time:
         raise ValidationError(
-            _('Time should be no earlier than after {!s}.'.
-              format(min_time)),
-            code='invalid'
+            _('Time should be no earlier than after {!s}.'.format(min_time))
         )
 
 
 def validate_not_weekend(value):
     if value.weekday() >= 5:
-        raise ValidationError(
-            _("You can't reserve room at weekends."),
-            code='invalid'
-        )
+        raise ValidationError(_("You can't reserve room at weekends."))
 
 
 def validate_end_after_start(data):
