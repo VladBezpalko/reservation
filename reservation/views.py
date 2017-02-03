@@ -25,9 +25,7 @@ class RoomReservationViewSet(ModelViewSet):
     ordering_fields = ('start_date', )
 
     @detail_route(methods=['POST'], permission_classes=[IsAdminUser])
-    def reply(self, request, pk=None):
-        assert pk is not None
-
+    def reply(self, request, pk):
         instance = self.get_object()
         answer_serializer = AnswerSerializer(data=request.data)
         answer_serializer.is_valid(raise_exception=True)
@@ -42,14 +40,12 @@ class RoomReservationViewSet(ModelViewSet):
         return Response(serializer.data)
 
     @detail_route(methods=['GET'], permission_classes=[IsAdminUser])
-    def overlapping(self, request, pk=None):
+    def overlapping(self, request, pk):
         """
         Это можно делать и на фронте, в фильтре это заложено.
         Сделано, на всякий случай, для удобства фронтендщика
         (передавать id записи, а не datetime's)
         """
-        assert pk is not None
-
         instance = self.get_object()
         overlapping = instance.overlapping_list
         serializer = RoomReservationSerializer(overlapping, many=True)
