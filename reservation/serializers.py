@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from reservation.validators import (
     validate_end_after_start,
     validate_max_duration,
@@ -7,6 +8,7 @@ from reservation.validators import (
 from rest_framework import serializers
 
 from reservation.models import RoomReservation
+from reservation.exceptions import NotUpdateIfApplied
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,6 +22,11 @@ class RoomReservationSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
+
+    def update(self, instance, validated_data):
+        if instance.answer == RoomReservation.ALLOW:
+            raise NotUpdateIfApplied
+        return super().update(instance, validated_data)
 
     class Meta:
         model = RoomReservation

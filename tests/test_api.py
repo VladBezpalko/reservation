@@ -58,6 +58,19 @@ def test_update(api_user, fixt_part_data, fixt_reservation):
     assert response.status_code == status.HTTP_200_OK
 
 
+@freeze_time('2016-2-1')
+def test_update_if_applied(api_user, fixt_part_data, fixt_reservation):
+    fixt_reservation.answer = RoomReservation.ALLOW
+    fixt_reservation.save()
+
+    response = api_user.patch(
+        '/reservation/{}/'.format(fixt_reservation.id),
+        fixt_part_data
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_update_not_owner(api_user, fixt_part_data, fixt_admin_reservation):
     response = api_user.patch(
         '/reservation/{}/'.format(fixt_admin_reservation.id),

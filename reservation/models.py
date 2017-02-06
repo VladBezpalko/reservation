@@ -44,7 +44,7 @@ class RoomReservation(models.Model):
             start_date__lt=self.end_date,
             end_date__gt=self.start_date,
             answer=RoomReservation.ALLOW,
-        )
+        ).exclude(id=self.id)
 
     # TODO: optimize filter (db indexing or caching)
 

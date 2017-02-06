@@ -8,3 +8,9 @@ class RecordOverlap(APIException):
     default_detail = _('This record can not be allowed, '
                        'because overlap with existing allowed records')
     default_code = 'record overlap'
+
+
+class NotUpdateIfApplied(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('This record can not be updated,'
+                       ' because it is already applied')
