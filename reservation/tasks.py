@@ -1,8 +1,9 @@
 from datetime import timedelta
 
+from celery.task import task
+
 from django.utils import timezone
 
-from celery.task import task
 from reservation.models import RoomReservation
 
 

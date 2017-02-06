@@ -1,21 +1,23 @@
-import pytest
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
-from django.core.exceptions import ValidationError
-from pytest import fixture
-from rest_framework.exceptions import ValidationError as RestValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
+
 from freezegun import freeze_time
 
+import pytest
+
 from reservation.validators import (
+    validate_end_after_start,
+    validate_max_duration,
+    validate_min_duration,
     validate_not_in_past,
     validate_not_late,
     validate_not_weekend,
     validate_working_hours,
-    validate_end_after_start,
-    validate_max_duration,
-    validate_min_duration
 )
+
+from rest_framework.exceptions import ValidationError as RestValidationError
 
 
 @freeze_time('2016-1-29')
@@ -64,7 +66,7 @@ def test_validate_before_working_hours():
         validate_working_hours(datetime(2016, 2, 1, hour=6))
 
 
-@fixture
+@pytest.fixture
 def fixt_normal_data(fixt_reservation):
     return {
         'start_date': fixt_reservation.start_date,
@@ -100,7 +102,6 @@ def test_validate_not_min_duration(fixt_normal_data):
 
 
 def test_validate_min_duration(fixt_normal_data):
-    # end_date already minimal
     fixt_normal_data['end_date'] -= timedelta(minutes=1)
     with pytest.raises(RestValidationError):
         validate_min_duration(fixt_normal_data)

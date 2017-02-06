@@ -1,8 +1,8 @@
-from django.utils import timezone
-
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+
 from rest_framework import serializers
 
 

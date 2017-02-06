@@ -1,14 +1,14 @@
 from django.contrib.auth import get_user_model
 
+from rest_framework import serializers
+
+from reservation.exceptions import NotUpdateIfApplied
+from reservation.models import RoomReservation
 from reservation.validators import (
     validate_end_after_start,
     validate_max_duration,
     validate_min_duration,
 )
-from rest_framework import serializers
-
-from reservation.models import RoomReservation
-from reservation.exceptions import NotUpdateIfApplied
 
 
 class UserSerializer(serializers.ModelSerializer):

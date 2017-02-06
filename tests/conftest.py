@@ -1,10 +1,11 @@
 from datetime import datetime
 
+from django.contrib.auth import get_user_model
+
 from pytest import fixture
 
 from pytest_django.lazy_django import skip_if_no_django
 
-from django.contrib.auth import get_user_model
 from pytz import UTC
 
 User = get_user_model()

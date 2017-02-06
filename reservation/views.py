@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+
 from rest_framework.decorators import detail_route
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from reservation.exceptions import RecordOverlap
 from reservation.filters import RoomReservationFilter
@@ -41,11 +42,6 @@ class RoomReservationViewSet(ModelViewSet):
 
     @detail_route(methods=['GET'], permission_classes=[IsAdminUser])
     def overlapping(self, request, pk):
-        """
-        Это можно делать и на фронте, в фильтре это заложено.
-        Сделано, на всякий случай, для удобства фронтендщика
-        (передавать id записи, а не datetime's)
-        """
         instance = self.get_object()
         overlapping = instance.overlapping_list
         serializer = RoomReservationSerializer(overlapping, many=True)

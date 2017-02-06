@@ -1,9 +1,11 @@
 from django.conf.urls import url
 from django.contrib import admin
+
+from rest_framework.authtoken import views
+from rest_framework.routers import DefaultRouter
+
 from reservation.views import RoomReservationViewSet, UsersViewSet
 
-from rest_framework.routers import DefaultRouter
-from rest_framework.authtoken import views
 
 router = DefaultRouter()
 router.register(r'reservation', RoomReservationViewSet)

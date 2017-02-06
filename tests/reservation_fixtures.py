@@ -1,10 +1,11 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.utils import timezone
+
 from pytest import fixture
 
 from reservation.models import RoomReservation
-from django.utils import timezone
 
 
 @fixture

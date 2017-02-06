@@ -3,10 +3,10 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from reservation.validators import (
-    validate_working_hours,
     validate_not_in_past,
     validate_not_late,
     validate_not_weekend,
+    validate_working_hours,
 )
 
 

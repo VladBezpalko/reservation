@@ -1,9 +1,12 @@
-from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.contrib.auth import get_user_model
+
+from freezegun import freeze_time
+
+from pytest import fixture
 
 from rest_framework import status
-from pytest import fixture
-from freezegun import freeze_time
+
 from reservation.models import RoomReservation
 
 

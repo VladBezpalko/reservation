@@ -2,8 +2,8 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from reservation.tasks import delete_old_records
 from reservation.models import RoomReservation
+from reservation.tasks import delete_old_records
 
 
 def test_not_deletes_new_reservations(fixt_reservation):
