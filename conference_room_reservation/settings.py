@@ -1,5 +1,9 @@
 import os
+import sys
 from datetime import time, timedelta
+
+from getenv import env
+from dj_database_url import parse as parse_db_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -67,11 +71,13 @@ WSGI_APPLICATION = 'conference_room_reservation.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
+DATABASE_URL = env(
+    'DATABASE_URL',
+    default='postgres://admin:admin@localhost:5432/reservation',
+)
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': parse_db_url(DATABASE_URL, conn_max_age=600),
 }
 
 
@@ -93,6 +99,77 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '[%(levelname)s %(name)s %(asctime)s]: %(message)s'
+        },
+        'plain': {
+            'format': '%(message)s'
+        },
+        'celery_task': {
+            '()': 'celery.app.log.TaskFormatter',
+            'fmt': '[%(levelname)s %(task_name)s %(asctime)s]: %(message)s',
+            'use_color': False,
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+            'stream': sys.stdout,
+        },
+        'print': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_true'],
+            'formatter': 'plain',
+            'stream': sys.stdout,
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'django_extensions.management.commands.runserver_plus': {
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
+        'celery.redirected': {
+            'handlers': ['print'],
+            'propagate': False,
+        },
+        'celery.task': {
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'werkzeug': {
+            'propagate': False,
+        },
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -119,8 +196,15 @@ REST_FRAMEWORK = {
     )
 }
 
-BROKER_URL = 'redis://'
-CELERY_RESULT_BACKEND = 'redis://'
+REDIS_HOST = env('DEFAULT_REDIS_HOST', default='localhost')
+REDIS_PORT = env('DEFAULT_REDIS_PORT', default=6379)
+CELERY_REDIS_URL = 'redis://%s:%d/' % (REDIS_HOST, REDIS_PORT)
+
+BROKER_URL = env('BROKER_URL', default=CELERY_REDIS_URL)
+CELERY_RESULT_BACKEND = env(
+    'CELERY_RESULT_BACKEND',
+    default=CELERY_REDIS_URL,
+)
 
 CELERYBEAT_SCHEDULE = {
     'delete-old-records': {
