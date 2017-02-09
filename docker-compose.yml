@@ -1,0 +1,44 @@
+version: '2'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_USER: "admin"
+      POSTGRES_DB: "reservation"
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DATABASE_URL: "postgres://admin:admin@db:5432/reservation"
+      CELERY_BROKER_URL: "redis://redis:6379"
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  redis:
+      image: redis
+      expose:
+        - "6379"
+  worker:
+    build: .
+    command: celery worker
+    environment:
+      DATABASE_URL: "postgres://admin:admin@db:5432/reservation"
+      CELERY_BROKER_URL: "redis://redis:6379"
+    depends_on:
+      - web
+      - redis
+  beat:
+    build: .
+    command: celery beat
+    environment:
+      DATABASE_URL: "postgres://admin:admin@db:5432/reservation"
+      CELERY_BROKER_URL: "redis://redis:6379"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      - web
+      - redis
